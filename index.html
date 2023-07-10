@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Sharing Website</title>
+  <style>
+    #upload-form {
+      margin-bottom: 10px;
+    }
+    #file-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .file-item {
+      margin-bottom: 5px;
+    }
+    .file-link {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>File Sharing Website</h1>
+
+  <form id="upload-form" enctype="multipart/form-data" action="https://your-app-url/upload" method="post">
+    <input type="file" id="file-input" name="file" />
+    <button type="submit">Upload</button>
+  </form>
+
+  <ul id="file-list"></ul>
+
+  <script>
+    const fileList = document.getElementById('file-list');
+
+    fetch('https://your-app-url/files')
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(file => {
+          const downloadLink = `https://your-app-url/download/${file.directory}/${file.filename}`;
+          const listItem = document.createElement('li');
+          listItem.className = 'file-item';
+          listItem.innerHTML = `
+            <span><a class="file-link" href="${downloadLink}" target="_blank">${file.filename}</a></span>
+            <button onclick="deleteFile('${file.directory}')">Delete</button>
+            <span>Link: <a href="${downloadLink}" target="_blank">${downloadLink}</a></span>
+          `;
+          fileList.appendChild(listItem);
+        });
+      })
+      .catch(error => console.error(error));
+
+    function deleteFile(directory) {
+      fetch(`https://your-app-url/delete/${directory}`, {
+        method: 'DELETE'
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message === 'Directory deleted') {
+            const listItem = document.querySelector(`[data-directory="${directory}"]`);
+            listItem.remove();
+          }
+        })
+        .catch(error => console.error(error));
+    }
+  </script>
+</body>
+</html>
